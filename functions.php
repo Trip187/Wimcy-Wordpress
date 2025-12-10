@@ -38,7 +38,7 @@ function my_theme_child_enqueue_assets()
     // JS bundle
     wp_enqueue_script(
         'react-app',
-        get_stylesheet_directory_uri() . '/react-app/dist/assets/index-CiQeNqBR.js',
+        get_stylesheet_directory_uri() . '/react-app/dist/assets/index-DEJahjXA.js ',
         array(),
         null,
         true
