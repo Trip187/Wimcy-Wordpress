@@ -8,7 +8,7 @@ function App() {
     <>
       <IframeVideo />
       <DarkTheme />
-      <Photoshop />
+      {/* <Photoshop /> */}
     </>
   );
 }

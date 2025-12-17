@@ -3,9 +3,9 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 const IframeVideo = () => {
   const videos = [
-    "/wp-content/themes/my-theme-child/react-app/dist/videos/video1.mp4",
-    "/wp-content/themes/my-theme-child/react-app/dist/videos/video2.mp4",
-    "/wp-content/themes/my-theme-child/react-app/dist/videos/video3.mp4",
+    "/videos/video1.mp4",
+    "/videos/video2.mp4",
+    "/videos/video3.mp4",
   ];
 
   const [currentVideo, setCurrentVideo] = useState(0);
