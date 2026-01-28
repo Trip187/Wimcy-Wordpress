@@ -1,0 +1,89 @@
+import { useState } from "react";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+
+const PhotoAlbum = () => {
+  const base = window.THEME_ASSETS_URL + "/photos";
+
+  const photos = [
+    `${base}/Screenshot-42.png`,
+    `${base}/Screenshot-43.png`,
+    `${base}/Screenshot-44.png`,
+    `${base}/Screenshot-45.png`,
+    `${base}/Screenshot-46.png`,
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const totalPhotos = photos.length;
+
+  console.log("THEME_ASSETS_URL:", window.THEME_ASSETS_URL);
+  console.log("Current photo:", photos[currentIndex]);
+
+  const gotoPrevious = () => {
+    const newIndex = currentIndex === 0 ? totalPhotos - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const gotoNext = () => {
+    const newIndex = currentIndex === totalPhotos - 1 ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+  };
+
+  return (
+    <div
+      className="photo-album"
+      style={{
+        position: "relative",
+        height: "auto",
+        width: "100%",
+        maxWidth: "900px",
+        margin: "0 auto",
+        objectFit: "cover",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        onClick={gotoPrevious}
+        style={{
+          position: "absolute",
+          top: "50%",
+          height: "50px",
+          left: "10px",
+          transform: "translateY(-50%)",
+          padding: "10px",
+          cursor: "pointer",
+          borderRadius: "50%",
+          backdropFilter: "blur(8px)",
+          background: "rgba(255,255,255,0.2)",
+          zIndex: 10,
+        }}
+      >
+        <IoIosArrowBack size={35} color="white" />
+      </div>
+
+      <img
+        src={photos[currentIndex]}
+        alt={`Photo ${currentIndex}`}
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
+      <div
+        onClick={gotoNext}
+        style={{
+          position: "absolute",
+          top: "50%",
+          height: "50px",
+          right: "10px",
+          transform: "translateY(-50%)",
+          padding: "10px",
+          cursor: "pointer",
+          borderRadius: "50%",
+          backdropFilter: "blur(8px)",
+          background: "rgba(255,255,255,0.2)",
+          zIndex: 10,
+        }}
+      >
+        <IoIosArrowForward size={35} color="white" />
+      </div>
+    </div>
+  );
+};
+export default PhotoAlbum;
