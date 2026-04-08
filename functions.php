@@ -36,10 +36,13 @@ function my_theme_child_enqueue_assets()
         null
     );
 
-    // JS bundle
+    // JS bundle (use the latest build hash so we don’t need to update this manually)
+    $jsFiles = glob(get_stylesheet_directory() . '/react-app/dist/assets/index-*.js');
+    $jsFile  = $jsFiles ? str_replace(get_stylesheet_directory(), get_stylesheet_directory_uri(), $jsFiles[0]) : get_stylesheet_directory_uri() . '/react-app/dist/assets/index-DJaypru8.js';
+
     wp_enqueue_script(
         'react-app',
-        get_stylesheet_directory_uri() . '/react-app/dist/assets/index-BSePcRuQ.js',
+        $jsFile,
         array(),
         null,
         true

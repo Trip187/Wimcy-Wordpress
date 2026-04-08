@@ -1,40 +1,66 @@
-import { useCallback, useEffect, useState } from "react";
-import { signInWithGooglePopup } from "../utils/firebase.utils";
-import { getLongDate } from "../utils/datetime.utils";
+import { useEffect, useCallback, useState } from "react";
+import {
+  signInWithGooglePopup,
+  signOutUser,
+  onAuthStateChangedListener,
+  getCommentsForPost,
+} from "../utils/firebase.utils";
 import { useSelector, useDispatch } from "react-redux";
-import NewComment from "./new-comment.component";
 import { setCurrentUser } from "../store/user/user.action";
 import { selectCurrentUser } from "../store/user/user.selector";
+import NewComment from "./new-comment.component";
+import { getLongDate } from "../utils/datetime.utils";
 import classes from "../components/comments.styles.module.css";
 
 const CommentList = ({ comments, postId }) => {
   const [commentList, setCommentList] = useState([]);
+  const dispatch = useDispatch();
+  const currentUser = useSelector(selectCurrentUser);
+
+  // 🔑 SYNC Redux FROM FIREBASE
+  useEffect(() => {
+    const unsubscribe = onAuthStateChangedListener((user) => {
+      dispatch(setCurrentUser(user));
+    });
+
+    return unsubscribe;
+  }, [dispatch]);
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const fetchedComments = await getCommentsForPost(postId);
+        setCommentList(fetchedComments);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+
+    fetchComments();
+  }, [postId]);
+
   useEffect(() => {
     setCommentList(comments);
   }, [comments]);
-  const currentUser = useSelector(selectCurrentUser);
-
-  console.log("DIRECT currentUser:", currentUser);
-
-  const dispatch = useDispatch();
 
   const signInWithGoogle = useCallback(async () => {
     try {
-      const response = await signInWithGooglePopup();
-      console.log("SIGN IN RESPONSE:", response);
-      dispatch(setCurrentUser(response.user));
+      await signInWithGooglePopup();
+      // 🚫 DO NOT dispatch here
     } catch (error) {
       console.error("SIGN IN FAILED:", error);
     }
-  }, [dispatch]);
-  const signOutHandler = () => {
-    dispatch(setCurrentUser(null));
+  }, []);
+
+  const signOutHandler = async () => {
+    await signOutUser();
+    // 🚫 Redux will update automatically
   };
 
-  console.log("currentUser:", currentUser);
-
-  const updateComments = (newComments) => {
-    setCommentList(newComments);
+  const updateComments = (updater) => {
+    setCommentList((prev) =>
+      typeof updater === "function" ? updater(prev) : updater,
+    );
   };
 
   return (
@@ -46,15 +72,16 @@ const CommentList = ({ comments, postId }) => {
           <span className={classes["lnk-sign-in"]} onClick={signInWithGoogle}>
             Sign in
           </span>
-
           <span> to post your comment.</span>
         </div>
       )}
+
       {currentUser && (
         <div className={classes["sign-in-wrapper"]}>
           <span className={classes["lnk-sign-in"]} onClick={signOutHandler}>
             Sign Out
           </span>
+
           <NewComment
             postId={postId}
             updateComments={updateComments}
@@ -65,16 +92,12 @@ const CommentList = ({ comments, postId }) => {
 
       {commentList &&
         commentList
-
           .sort((a, b) => b.createdAt - a.createdAt)
-
           .map((c) => (
             <div key={c.createdAt}>
               <div className={classes["comment-wrapper"]}>
                 <div className={classes["user"]}>{c.user}</div>
-
                 <div>{c.comment}</div>
-
                 <div className={classes["comment-date"]}>
                   {getLongDate(c.createdAt)}
                 </div>
@@ -84,4 +107,5 @@ const CommentList = ({ comments, postId }) => {
     </div>
   );
 };
+
 export default CommentList;

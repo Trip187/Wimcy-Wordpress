@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApp, getApps } from "firebase/app";
 import {
   getAuth,
   signInWithPopup,
@@ -6,8 +6,18 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
 } from "firebase/auth";
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+} from "firebase/firestore";
 
+/* ----------------------------------
+   Firebase config
+---------------------------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyBIv7XSjz1SABGLwUfXryAxmHy2dgjzSg0",
   authDomain: "wimcy-2e94e.firebaseapp.com",
@@ -17,59 +27,78 @@ const firebaseConfig = {
   appId: "1:1006393137909:web:4232c35bc274f2bd5183bc",
 };
 
-// ✅ Initialize Firebase
-const app = initializeApp(firebaseConfig);
+/* ----------------------------------
+   Initialize Firebase (SAFE for WP)
+---------------------------------- */
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// ✅ Services
-export const db = getFirestore(app);
+/* ----------------------------------
+   Services
+---------------------------------- */
 export const auth = getAuth(app);
+export const db = getFirestore(app);
 
-// ✅ Google Auth
+/* ----------------------------------
+   Google Auth
+---------------------------------- */
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
 export const signInWithGooglePopup = () =>
   signInWithPopup(auth, googleProvider);
-export const signOutUser = async () => signOut(auth);
+
+export const signOutUser = () => signOut(auth);
+
 export const onAuthStateChangedListener = (callback) =>
   onAuthStateChanged(auth, callback);
 
-// ✅ Comments
+/* ----------------------------------
+   Comments
+---------------------------------- */
 export const addCommentToPost = async (postId, userDisplayName, comment) => {
-  try {
-    const docRef = doc(db, "comments", postId);
-    const docSnap = await getDoc(docRef);
+  const user = auth.currentUser;
 
-    if (docSnap.exists()) {
-      const createdAt = new Date();
-
-      const newComment = {
-        user: userDisplayName,
-
-        comment,
-
-        createdAt: createdAt.getTime(),
-      };
-
-      const data = docSnap.get("comments");
-
-      let newData = null;
-
-      if (data) {
-        newData = {
-          comments: [...data, newComment],
-        };
-      } else {
-        newData = {
-          comments: [newComment],
-        };
-      }
-
-      await updateDoc(docRef, newData);
-
-      return newData;
-    }
-  } catch (error) {
-    console.error("Error adding comment:", error);
+  if (!user) {
+    console.error("User not authenticated yet");
+    throw new Error("Auth not ready");
   }
+
+  const createdAt = Date.now();
+
+  const commentData = {
+    user: userDisplayName,
+    comment,
+    createdAt,
+    userId: user.uid,
+  };
+
+  console.log("Writing comment:", commentData);
+  console.log("auth.currentUser:", auth.currentUser);
+  console.log("uid:", auth.currentUser?.uid);
+
+  const docRef = await addDoc(
+    collection(db, "comments", postId, "items"),
+    commentData,
+  );
+
+  return {
+    id: docRef.id,
+    ...commentData,
+  };
+};
+
+export const getCommentsForPost = async (postId) => {
+  const q = query(
+    collection(db, "comments", postId, "items"),
+    orderBy("createdAt", "desc"),
+  );
+  const querySnapshot = await getDocs(q);
+  const comments = [];
+  querySnapshot.forEach((doc) => {
+    comments.push({
+      id: doc.id,
+      ...doc.data(),
+    });
+  });
+  return comments;
 };

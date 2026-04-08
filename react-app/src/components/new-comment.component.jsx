@@ -11,21 +11,23 @@ const NewComment = ({ postId, userDisplayName, updateComments }) => {
 
   const postCommentHandler = async () => {
     const newComment = commentRef.current.value.trim();
-
-    if (newComment.length === 0) {
-      return;
-    }
+    if (!newComment) return;
 
     setIsPending(true);
 
-    const res = await addCommentToPost(postId, userDisplayName, newComment);
+    try {
+      const createdComment = await addCommentToPost(
+        postId,
+        userDisplayName,
+        newComment,
+      );
 
-    if (res) {
       commentRef.current.value = "";
 
-      updateComments(res.comments);
-    } else {
-      alert("Posting failed!");
+      updateComments((prev) => [createdComment, ...prev]);
+    } catch (err) {
+      alert("Posting failed. Please try again.");
+      console.error(err);
     }
 
     setIsPending(false);
