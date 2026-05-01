@@ -5,11 +5,11 @@ const PhotoAlbum = () => {
   const base = window.THEME_ASSETS_URL + "/photos";
 
   const photos = [
-    `${base}/Screenshot-42.png`,
-    `${base}/Screenshot-43.png`,
-    `${base}/Screenshot-44.png`,
-    `${base}/Screenshot-45.png`,
-    `${base}/Screenshot-46.png`,
+    `${base}/mj1.JPG`,
+    `${base}/mj2.JPG`,
+    `${base}/mj3.JPG`,
+    `${base}/mj4.JPG`,
+    `${base}/mj5.JPG`,
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
