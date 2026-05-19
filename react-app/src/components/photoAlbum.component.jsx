@@ -33,12 +33,10 @@ const PhotoAlbum = () => {
       className="photo-album"
       style={{
         position: "relative",
-        height: "auto",
+        height: "500px",
         width: "100%",
         maxWidth: "900px",
         margin: "0 auto",
-        objectFit: "cover",
-        overflow: "hidden",
       }}
     >
       <div
@@ -63,7 +61,7 @@ const PhotoAlbum = () => {
       <img
         src={photos[currentIndex]}
         alt={`Photo ${currentIndex}`}
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        style={{ width: "100%", height: "100%", objectFit: "contain" }}
       />
       <div
         onClick={gotoNext}
